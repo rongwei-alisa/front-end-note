@@ -24,6 +24,9 @@ Function.prototype.bind = function() {
         args = [].slice.apply(arguments); // 剩余的参数转为数组
     
     return function() {
+        // 这里为什么需要用 concat 方法
+        // 因为 bind 方法在使用的时候可以 var bindfn = fn.bind(this, arg1, arg2); bindfn(arg1, arg2);
+        // 所以这里的 arguments 跟外层的 arguments 不是同一个对象，这里的是 bind 返回的函数在被执行的时候接收的参数
         self.apply(context, args.concat([].slice.apply(arguments)));
     }
 };

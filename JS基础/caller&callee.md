@@ -32,3 +32,30 @@ function calleeLengthDemo(arg1, arg2) {
 }
 calleeLengthDemo(1);
 ```
+```
+// 实现函数柯里化
+Function.prototype.currying = function() {
+    var args = [],
+        self = this;
+    
+    return function() {
+        if(arguments.length === 0) {
+            return self.apply(this, args);  // ?????????????????????
+        } else {
+            [].push.apply(args, arguments);
+            return arguments.callee;
+        }
+    }
+}
+var add = function() {
+    var sum = 0;
+    for(var i = 0; i < arguments.length; i++) {
+        sum += arguments[i];
+    }
+    return sum;
+}.currying();
+add(2); // 未求值
+add(3, 3); // 未求值
+add(4); // 未求值
+console.log(add()); // 12
+```
