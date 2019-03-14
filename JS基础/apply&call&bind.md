@@ -3,6 +3,11 @@
 * bind 返回一个改变了上下文 this 值的函数，call 和 apply 则是在传入的对象上立即执行调用他们的函数
 * bind 和 call 的第二个开始及之后的参数是一个参数列表； apply 的第二个参数是一个数组
 
+bind 特点：
+* 保存 this 返回一个函数
+* 可以传入参数
+* bind 返回的函数可以通过 new 操作符创建对象，这种行为就像把原函数（调用 bind 方法的函数）当作构造器。提供的 this（传入 bind 方法的 this 值被忽略，新的 this 值指向 new 方法创建的实例对象） 值被忽略，同时调用时的参数被提供给模拟函数   
+
 ***在 ES6 的箭头函数下，call 和 apply 将失效。***
 ```
 // apply 实现 call
@@ -19,17 +24,37 @@ Function.prototype.bind = function() {
     // slice 方法返回对传入数组的一部分的浅拷贝，不会改变原数组
     // arguments 为类数组，不具备 shift 和 slice 方法
 
-    var self = this, // 保存原函数
+    var self = this, // 保存原函数，即调用 bind 方法的 bar 函数对象
         context = [].shift.apply(arguments), // 返回传入函数的第一个参数，即函数内 this 的指向
         args = [].slice.apply(arguments); // 剩余的参数转为数组
     
-    return function() {
+    var fResult =  function() {
         // 这里为什么需要用 concat 方法
-        // 因为 bind 方法在使用的时候可以 var bindfn = fn.bind(this, arg1, arg2); bindfn(arg1, arg2);
+        // 因为 bind 方法在使用的时候可以 var bindFn = fn.bind(this, arg1, arg2); bindFn(arg1, arg2);
         // 所以这里的 arguments 跟外层的 arguments 不是同一个对象，这里的是 bind 返回的函数在被执行的时候接收的参数
-        self.apply(context, args.concat([].slice.apply(arguments)));
-    }
+        console.log(this); // 没有 fResult.prototype = self.prototype;时，使用 new 方法时是 self 的实例对象；作为函数调用时指向 window 对象，将 fResult 的圆心改变之后，this 指向 bar
+        self.apply(this instanceof self ? this : context, args.concat([].slice.apply(arguments))); // 将 bind 方法传入的 this 值指向调用 bind 方法的 bar
+    };
+    fResult.prototype = self.prototype; // fResult 中的 this 将指向 bar
+    return fResult;
 };
+
+var foo = {
+    value: 1
+};
+
+function bar(name, age) {
+    this.sex = 'female';
+    console.log(name);
+    console.log(age);
+    console.log(this.value);
+}
+
+var bindFn = bar.bind(foo, 'ZhangSan');
+bindFn(18);
+
+var obj = new bindFn('female');
+console.log(obj.sex);
 ```
 应用：
 ```
