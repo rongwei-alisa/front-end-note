@@ -1,14 +1,20 @@
-都是用来改变函数运行时 this 的指向。第一个参数都是函数内部 this 的指向。当第一参数传值为 null 或者 undefined 时，默认指向 window
-不同：
+***在 ES6 的箭头函数下，call 和 apply 将失效。***
+### 三者的比较
+相同之处：
+* 都是用来改变函数运行时 this 的指向
+* 第一个参数都是函数内部 this 的指向。当第一参数传值为 null 或者 undefined 时，默认指向 window
+* 都可以利用      
+
+不同之处：
 * bind 返回一个改变了上下文 this 值的函数，call 和 apply 则是在传入的对象上立即执行调用他们的函数
 * bind 和 call 的第二个开始及之后的参数是一个参数列表； apply 的第二个参数是一个数组
 
 bind 特点：
-* 保存 this 返回一个函数
+* 保存 this，返回一个函数
 * 可以传入参数
 * bind 返回的函数可以通过 new 操作符创建对象，这种行为就像把原函数（调用 bind 方法的函数）当作构造器。提供的 this（传入 bind 方法的 this 值被忽略，新的 this 值指向 new 方法创建的实例对象） 值被忽略，同时调用时的参数被提供给模拟函数   
 
-***在 ES6 的箭头函数下，call 和 apply 将失效。***
+### 利用 apply
 ```
 // apply 实现 call
 Function.prototype.call = function() {
