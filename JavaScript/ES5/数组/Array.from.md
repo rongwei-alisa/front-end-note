@@ -3,9 +3,11 @@
  * @Author: RongWei
  * @Date: 2019-08-29 09:31:30
  * @LastEditors: RongWei
- * @LastEditTime: 2019-08-29 19:23:46
+ * @LastEditTime: 2019-09-03 17:36:25
  -->
-`Array.from()` 方法从一个类似数组或可迭代对象中创建一个新的，浅拷贝的数组实例。
+ # Array.from()
+
+> `Array.from()` 方法从一个类似数组或可迭代对象中创建一个新的，浅拷贝的数组实例。
 
 ***类数组结构转数组，也可以用展开运算符。***
 

@@ -1,5 +1,23 @@
-### 文件相关
-`cat>>filename` 或 `touch filename`：新建文件
+<!--
+ * @Description: file content
+ * @Author: RongWei
+ * @Date: 2019-04-01 15:55:31
+ * @LastEditors: RongWei
+ * @LastEditTime: 2019-09-12 17:34:23
+ -->
+### 文件和目录相关
+```
+// 创建一个叫做 'dir1' 的目录'
+mkdir dir1  
+// 同时创建两个目录  
+mkdir dir1 dir2 
+// 创建一个目录树 
+mkdir -p /tmp/dir1/dir2  
+
+// 新建文件
+cat>>filename
+touch filename
+```
 
 ### 任务相关
 `fg`： 将后台任务切换到前台运行
