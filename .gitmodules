@@ -1,0 +1,3 @@
+[submodule "algorithm_dataStructure/LeetCode"]
+	path = algorithm_dataStructure/LeetCode
+	url = ../LeetCode
