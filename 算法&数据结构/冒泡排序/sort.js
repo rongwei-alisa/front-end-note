@@ -1,9 +1,9 @@
 /*
- * @Description: file content
+ * @Description: 冒泡排序的实现
  * @Author: RongWei
  * @Date: 2020-08-02 23:05:46
  * @LastEditors: RongWei
- * @LastEditTime: 2020-08-02 23:16:04
+ * @LastEditTime: 2020-08-02 23:28:45
  */
 function sort(arr) {
     const len = arr.length;
