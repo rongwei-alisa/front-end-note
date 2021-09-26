@@ -2,7 +2,7 @@
  * @Author: RongWei
  * @Date: 2021-09-20 11:21:19
  * @LastEditors: RongWei
- * @LastEditTime: 2021-09-23 22:04:31
+ * @LastEditTime: 2021-09-24 09:57:48
  * @Description: file content
 -->
 # npm
@@ -32,9 +32,9 @@ package.json 文件是项目的清单。它的内容没有固定的要求，满�
   ```
 
 - `dependencies` 项目运行所依赖的模块，`npm install <pck> --save`
-- `devDependencies` 项目开发所需要的模块， `npm install <pck> --save-dev` 或 `npm install <pck> -D`
+- `devDependencies` 项目开发所需要的模块，通常是一些开发、测试、打包工具，如 babel、webpack、ESLint、jest等， `npm install <pck> --save-dev` 或 `npm install <pck> -D`
 ***需要设置 --production 标志（npm install --production），以避免安装这些开发依赖项***
-- `peerDependencies` 
+- `peerDependencies` 应用运行依赖的宿主包，可以被对等安装
 - `bin` 指定各个内部命令对应的可执行文件的位置，在编写 node 工具的时候一定会用到。例如 webpack 模块：
   ```
   // 当我们执行 webpack 命令的时候，执行的是 bin/webpack.js 文件中的代码
