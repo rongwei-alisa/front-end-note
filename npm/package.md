@@ -2,14 +2,16 @@
  * @Author: RongWei
  * @Date: 2021-09-20 11:21:19
  * @LastEditors: RongWei
- * @LastEditTime: 2021-09-24 09:57:48
+ * @LastEditTime: 2021-09-27 21:11:09
  * @Description: file content
 -->
-# npm
+## 如何生成 package.json 和 package-lock.json
 Node.js 标准的软件包管理器，可以管理项目依赖的下载
-`npm init -y` 可以自动生成 package.json
-`npm install <pkg-name>` 安装软件包
-`npm update <pkg-name>` 更新软件包
+`npm init` 交互式问答的方式生成 packahe.json
+`npm init -y` 自动生成默认的 package.json
+`npm install` 安装 package.json 中的依赖，并生成 package-lock.json, 锁住依赖及依赖的依赖的版本
+`npm install <pkg-name>` 安装某个软件包
+`npm update <pkg-name>` 更新某个软件包
 `npm root -g` 全局安装包的位置
 
 ## [package.json](https://docs.npmjs.com/cli/v7/configuring-npm/package-json)
@@ -17,7 +19,7 @@ package.json 文件是项目的清单。它的内容没有固定的要求，满�
 - `name` 项目名称，命名有一定的规范。
   - 当在 npm 上发布包时，会成为 URL 的一部分，因此不能包含任何非 URL 安全字符；
   - 也可能会作为 require() 的参数传递
-  - 有些包名会有 [scope](https://docs.npmjs.com/cli/v7/using-npm/scope)，命名遵循 name 的规范，scope 前面是 @ 符号，后面是 /，如 @maycur/business
+  - 有些包名会含有 [scope](https://docs.npmjs.com/cli/v7/using-npm/scope)
 
 - `version` 当前的版本
 **当需要发布包时，以上两个属性是及其重要而且必须的，它们一起构成了一个唯一的标识符**
@@ -31,7 +33,7 @@ package.json 文件是项目的清单。它的内容没有固定的要求，满�
   "scripts": {"start": "node server.js"}
   ```
 
-- `dependencies` 项目运行所依赖的模块，`npm install <pck> --save`
+- `dependencies` 项目运行所依赖的模块，`npm install <pck> --save-prod`
 - `devDependencies` 项目开发所需要的模块，通常是一些开发、测试、打包工具，如 babel、webpack、ESLint、jest等， `npm install <pck> --save-dev` 或 `npm install <pck> -D`
 ***需要设置 --production 标志（npm install --production），以避免安装这些开发依赖项***
 - `peerDependencies` 应用运行依赖的宿主包，可以被对等安装
@@ -84,11 +86,75 @@ package.json 文件是项目的清单。它的内容没有固定的要求，满�
   ]
 }
 ```
-### scope
-scope 是将相关的一系列包分组放在一起的一个方法。
-如 `@somescope/somepackagename`，会被安装在 `node_modules/@somescope/somepackagename`下
+### peerDependencies
+>peerDependencies 的目的是提示宿主环境去安装满足插件 peerDependencies 所指定依赖的包，然后在插件 import 或者 require 所依赖的包的时候，永远都是引用宿主环境统一安装的 npm 包，最终解决插件与所依赖包不一致的问题。
 
-### 语义版本控制（semver）
+#### 为何要引入 peerDependencies
+假设：
+```
+// maycur-business 和 maycur-antd package.json
+"dependencies": {
+  "classnames": "^2.2.5"
+}
+```
+那么我们在 form-web 中执行 `npm install maycur-business` 会得到如下目录结构：
+```
+maycur-form-web
+|- node_modules
+   |- maycur-business
+      |- classnames
+   |- maycur-antd
+      |- classnames
+```
+问题：
+1、classnames 被多次安装
+2、form-web 中无法直接使用 classnames，因为它没有被直接安装在 node_modules 目录下
+为了解决这种问题，在 npm2 中引入了 peerDependencies
+```
+// maycur-business 和 maycur-antd package.json
+"peerDependencies": {
+  "classnames": "^2.2.5"
+}
+```
+这时在 form-web 中执行 `npm install maycur-business` 会得到如下目录结构：
+```
+maycur-form-web
+|- node_modules
+   |- maycur-business
+   |- maycur-antd
+   |- classnames
+```
+
+
+### [scope](https://docs.npmjs.com/cli/v7/using-npm/scope)
+scope 是一种将相关的模块组织到一起的一种方式。可以理解为作用域、命名空间，可以防止包重名
+命名遵循 name 的规范，scope 前面是 @ 符号，后面是 /，如 `@somescope/somepackagename`，会被安装在 `node_modules/@somescope/somepackagename`下
+
+
+scopes 和 包的可见性
+- 包的可见性由包的 scope 和访问级别（公共或私有）来决定。
+- 非 scope 的包总是公共的
+- 私有包总是有作用域(scope)的
+- 带有 scope 的包默认是私有的，当想发布一个公共模块时，必须要带有参数 `--access public`
+
+#### 使用带有 scope 的模块
+`const XX = require('@naycur/business')` 或者 
+`import XX from '@maycur/business'`
+会加载 node_modules/@maycur/business 模块
+
+#### 发布带有 scope 的模块
+`npm publish` 默认发布为私有模块，省略了 `--access restricted`， 要求必须有一个 npm 私有模块账户，可以选择自己搭建一个 npm 服务或者直接使用官方提供的服务，发布 user-scoped 或者 organization-scoped 的包
+`npm publish --access public` 发布为共有模块
+
+私有的 npm 包总是带有 scope，带有 scope 的包默认是私有的。
+
+#### 将一个 scope 和一个仓库关联
+
+举个🌰
+![@maycur](./@maycur.png)
+
+### version 
+语义版本控制（semver）
 `x.y.z` 主版本.次版本.补丁版本
 - 进行不兼容的 API 更改时，升级主版本
 - 以向后兼容的方式添加功能时，升级次版本
@@ -132,14 +198,7 @@ scope 是将相关的一系列包分组放在一起的一个方法。
 |prepatch|- 直接升级小号，增加预发布号为0|
 |prerelease|- 如果没有预发布号：增加小号，增加预发布号为0<br/>- 如果有预发布号，则升级预发布号|
 
-### [npm publish](https://docs.npmjs.com/cli/v7/commands/npm-publish) 
-发布包
-`npm publish [<tarball>|<folder>] [--tag <tag>]`
-
-- Publishes '.' if no argument supplied
-- Sets tag 'latest' if no --tag specified` 
-- `<tarball>|<folder>` 中一定包含 package.json
-### [npm scripts](https://docs.npmjs.com/cli/v7/using-npm/scripts)
+### [scripts](https://docs.npmjs.com/cli/v7/using-npm/scripts)
 `scripts` 属性支持大量内置的脚本及其预置的声明周期事件，可通过 `npm run-script <task-name>`（简写为 `npm run <task-name>`） 来执行。
 匹配到 task-name 的 pre 和 post 命令也会执行
 ```
@@ -149,10 +208,26 @@ scope 是将相关的一系列包分组放在一起的一个方法。
   "postbuild": "{{ executes AFTER `build` script }}"
 }
 ```
+
+### 发布包
+[npm publish](https://docs.npmjs.com/cli/v7/commands/npm-publish) 
+`npm publish [<tarball>|<folder>] [--tag <tag>]`
+
+- Publishes '.' if no argument supplied
+- Sets tag 'latest' if no --tag specified` 
+- `<tarball>|<folder>` 中一定包含 package.json
 ## [package-lock.json](https://docs.npmjs.com/cli/v7/configuring-npm/package-lock-json)
 package-lock.json 会固化当前安装的每个软件包的版本
 当运行 `npm update` 时，`package-lock.json` 中的软件包的版本会被更新
 requires 字段指定了软件包的依赖，它们会按照字母顺序被添加到文件中，每个都有 `version` 字段，指向软件包位置的 `resolved` 字段，以及用于校验软件包的 `integrity` 字段
+
+不同 npm 版本下 `npm install` 的规则
+- `npm 5.0.x` 不管 package.json 中依赖是否更新， 都会根据 package-lock.json 下载
+- `npm 5.1.0`后，当 package.json 中的依赖项有新版本时，`npm install` 会无视 package-lock.json 去下载新版本的依赖并更新 package-lock.json
+- `5.4.2`版本后，
+  - 如果只有一个 package.json 文件，运行 `npm i` 会根据它生成一个 package-lock.json 文件
+  - 如果 package.json 的 `semver-range version` 和 package-lock.json 中版本兼容，即使 package.json 中有新的版本，也还是会根据 package-lock.json 下载
+  - 如果手动修改了 package.json 的 version ranges，且和 package-lock.json 中版本不兼容，那么执行 `npm i` 时 package-lock.json 将会更新到兼容 package.json 的版本
 
 ### 查看 npm 包安装的版本
 `npm list` 也可以打开 package-lock.json 文件查看
@@ -167,4 +242,9 @@ requires 字段指定了软件包的依赖，它们会按照字母顺序被添�
 `npm install <package>@<version>`
 
 package-lock冲突时如何解决？
+
+
+参考文献
+- [npm Docs](https://docs.npmjs.com/)
+- [npm的package.json和package-lock.json更新策略](https://blog.csdn.net/weixin_43820866/article/details/105232066)
 
